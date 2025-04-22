@@ -1,139 +1,175 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Рандомайзер телефонных номеров</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: inline-block;
-        }
-        input, button {
-            padding: 10px;
-            margin: 10px;
-            font-size: 16px;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .phone-list {
-            margin-top: 20px;
-            text-align: left;
-        }
-        .phone-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 5px 0;
-        }
-        .call-button {
-            background-color: #28a745;
-            padding: 5px 10px;
-        }
-        .call-button:hover {
-            background-color: #218838;
-        }
-        .number-list {
-            margin-top: 20px;
-            background: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-            text-align: left;
-            white-space: pre-line;
-        }
-    </style>
-    <script>
-        function generatePhoneNumbers(count = 1) {
-            let prefix = document.getElementById("prefix").value;
-            let prefixLength = prefix.length;
-            let missingDigits = 11 - prefixLength;
-            
-            if (!prefix.startsWith("7")) {
-                alert("Префикс должен начинаться с '7'");
-                return;
-            }
-            if (prefixLength < 4 || prefixLength > 8) {
-                alert("Введите от 4 до 8 цифр в префиксе.");
-                return;
-            }
-            
-            let phoneList = document.getElementById("phoneList");
-            let numberList = document.getElementById("numberList");
-            phoneList.innerHTML = "";
-            numberList.innerText = "";
-            
-            let numbersText = "Список номеров:\n";
-            
-            for (let i = 0; i < count; i++) {
-                let randomNumber = Math.floor(Math.pow(10, missingDigits - 1) + Math.random() * (Math.pow(10, missingDigits) - Math.pow(10, missingDigits - 1)));
-                let fullNumber = prefix + randomNumber;
-                let phoneItem = document.createElement("div");
-                phoneItem.className = "phone-item";
-                phoneItem.innerHTML = `<span>${fullNumber}</span> <button class='call-button' onclick='callNumber("${fullNumber}")'>Позвонить</button>`;
-                phoneList.appendChild(phoneItem);
-                
-                numbersText += `${i + 1}. ${fullNumber}\n`;
-            }
-            numberList.innerText = numbersText;
-        }
-        
-        function callNumber(number) {
-            // Создаем ссылку с протоколом sip:
-            let sipLink = `sip:${number}`;
-            
-            // Пытаемся открыть ссылку, что должно запустить MicroSIP
-            window.location.href = sipLink;
-            
-            // Альтернативный вариант для браузеров, которые блокируют переходы
-            try {
-                let link = document.createElement('a');
-                link.href = sipLink;
-                link.click();
-            } catch (e) {
-                console.error("Не удалось инициировать звонок:", e);
-                alert("Не удалось инициировать звонок. Убедитесь, что MicroSIP установлен и зарегистрирован.");
-            }
-        }
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Рандомайзер телефонных номеров</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      display: inline-block;
+    }
+    input,
+    button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .phone-list {
+      margin-top: 20px;
+      text-align: left;
+    }
+    .phone-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 0;
+    }
+    .called span::before {
+      content: "✅ ";
+      color: green;
+    }
+    .call-button {
+      background-color: #28a745;
+      padding: 5px 10px;
+    }
+    .call-button:hover {
+      background-color: #218838;
+    }
+    .number-list {
+      margin-top: 20px;
+      background: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      text-align: left;
+      white-space: pre-line;
+    }
+  </style>
+  <script>
+    function loadCalledNumbers() {
+      try {
+        const data = JSON.parse(localStorage.getItem("calledNumbers"));
+        return Array.isArray(data) ? data : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveCalledNumber(number) {
+      const calledNumbers = loadCalledNumbers();
+      if (!calledNumbers.includes(number)) {
+        calledNumbers.push(number);
+        localStorage.setItem("calledNumbers", JSON.stringify(calledNumbers));
+      }
+    }
+
+    function generatePhoneNumbers(count = 1) {
+      const prefix = document.getElementById("prefix").value;
+      const prefixLength = prefix.length;
+      const missingDigits = 11 - prefixLength;
+
+      if (!prefix.startsWith("7")) {
+        alert("Префикс должен начинаться с '7'");
+        return;
+      }
+      if (prefixLength < 4 || prefixLength > 8) {
+        alert("Введите от 4 до 8 цифр в префиксе.");
+        return;
+      }
+
+      const phoneList = document.getElementById("phoneList");
+      const numberList = document.getElementById("numberList");
+      phoneList.innerHTML = "";
+      numberList.innerText = "";
+
+      const numbersText = ["Список номеров:"];
+      const calledNumbers = loadCalledNumbers();
+
+      for (let i = 0; i < count; i++) {
+        const randomNumber = Math.floor(Math.pow(10, missingDigits - 1) + Math.random() * (Math.pow(10, missingDigits) - Math.pow(10, missingDigits - 1)));
+        const fullNumber = prefix + randomNumber;
+        const isCalled = calledNumbers.includes(fullNumber);
+
+        const phoneItem = document.createElement("div");
+        phoneItem.className = "phone-item" + (isCalled ? " called" : "");
+        phoneItem.innerHTML = `
+          <span>${fullNumber}</span>
+          <button class='call-button' onclick='callNumber("${fullNumber}", this)'>Позвонить</button>`;
+        phoneList.appendChild(phoneItem);
+
+        numbersText.push(`${i + 1}. ${fullNumber}${isCalled ? " (Уже звонили)" : ""}`);
+      }
+
+      numberList.innerText = numbersText.join("\n");
+    }
+
+    function callNumber(number, buttonElement) {
+      const sipLink = `sip:${number}`;
+      window.location.href = sipLink;
+
+      try {
+        const link = document.createElement('a');
+        link.href = sipLink;
+        link.click();
+      } catch (e) {
+        console.error("Не удалось инициировать звонок:", e);
+        alert("Не удалось инициировать звонок. Убедитесь, что MicroSIP установлен и зарегистрирован.");
+      }
+
+      saveCalledNumber(number);
+
+      const item = buttonElement.closest('.phone-item');
+      if (item && !item.classList.contains("called")) {
+        item.classList.add("called");
+      }
+    }
+
+    function clearCallHistory() {
+      localStorage.removeItem("calledNumbers");
+      alert("История звонков очищена.");
+      document.getElementById("phoneList").innerHTML = "";
+      document.getElementById("numberList").innerText = "";
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      alert("Для работы функции 'Позвонить' необходимо:\n1. Установить MicroSIP\n2. В настройках MicroSIP разрешить обработку SIP-ссылок\n3. Перезагрузить компьютер после установки");
+    });
+  </script>
 </head>
 <body>
-    <div class="container">
-        <h2>Генератор случайных телефонных номеров</h2>
-        <label for="prefix">Введите префикс (4-8 цифр, например, 7495):</label>
-        <input type="text" id="prefix" placeholder="7495">
-        <br>
-        <button onclick="generatePhoneNumbers(1)">Сгенерировать 1 номер</button>
-        <button onclick="generatePhoneNumbers(5)">Сгенерировать 5 номеров</button>
-        <button onclick="generatePhoneNumbers(10)">Сгенерировать 10 номеров</button>
-        <h3>Сгенерированные номера:</h3>
-        <div id="phoneList" class="phone-list"></div>
-        <h3>Список номеров для копирования:</h3>
-        <div id="numberList" class="number-list"></div>
-    </div>
-    
-    <script>
-        // Дополнительная проверка для пользователей
-        document.addEventListener('DOMContentLoaded', function() {
-            alert("Для работы функции 'Позвонить' необходимо:\n1. Установить MicroSIP\n2. В настройках MicroSIP разрешить обработку SIP-ссылок\n3. Перезагрузить компьютер после установки");
-        });
-    </script>
+  <div class="container">
+    <h2>Генератор случайных телефонных номеров</h2>
+    <label for="prefix">Введите префикс (4-8 цифр, например, 7495):</label>
+    <input type="text" id="prefix" placeholder="7495" />
+    <br />
+    <button onclick="generatePhoneNumbers(1)">Сгенерировать 1 номер</button>
+    <button onclick="generatePhoneNumbers(5)">Сгенерировать 5 номеров</button>
+    <button onclick="generatePhoneNumbers(10)">Сгенерировать 10 номеров</button>
+    <button onclick="clearCallHistory()">Очистить историю звонков</button>
+    <h3>Сгенерированные номера:</h3>
+    <div id="phoneList" class="phone-list"></div>
+    <h3>Список номеров для копирования:</h3>
+    <div id="numberList" class="number-list"></div>
+  </div>
 </body>
 </html>
