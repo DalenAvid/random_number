@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Рандомайзер телефонных номеров</title>
+  <title>Генератор телефонных номеров</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -18,176 +18,303 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       display: inline-block;
     }
-    input,
-    button {
+    input, button, select {
       padding: 10px;
-      margin: 10px;
+      margin: 5px;
       font-size: 16px;
     }
     button {
-      background-color: #007bff;
-      color: white;
       border: none;
-      cursor: pointer;
       border-radius: 5px;
+      cursor: pointer;
+      color: white;
     }
-    button:hover {
-      background-color: #0056b3;
+    .generate-butt{
+      background-color: #0763c6;
     }
+    .export-butt{
+      background-color: darkslategray;
+    }
+    .call-button { background-color: #28a745; }
+    .bad-button { background-color: #dc3545; }
+    .alive-button { background-color: #ffc107; color: black; }
+    .filter-button { background-color: #007bff; }
+    .reset-button { background-color: #6c757d; }
+    button:hover { opacity: 0.9; }
     .phone-list {
       margin-top: 20px;
       text-align: left;
     }
     .phone-item {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       padding: 5px 0;
+      border-bottom: 1px solid #ddd;
+    }
+    .phone-item .number {
+      text-align: left;
+      flex-grow: 1;
+    }
+    .phone-item .buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
     }
     .called span::before {
-      content: "✅ ";
+      content: "\2714\0020";
       color: green;
     }
-    .call-button {
-      background-color: #28a745;
-      padding: 5px 10px;
-    }
-    .call-button:hover {
-      background-color: #218838;
+    .bad-number span { color: red; }
+    .alive-number span::after {
+      content: " (живой)";
+      color: green;
+      font-weight: bold;
     }
     .number-list {
       margin-top: 20px;
       background: #fff;
       padding: 10px;
       border-radius: 5px;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
       text-align: left;
       white-space: pre-line;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     }
   </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Генератор телефонных номеров</h2>
+
+    <label for="prefix">Префикс (например, 7495):</label>
+    <input type="text" id="prefix" placeholder="7495" />
+
+    <label for="customCount">Кол-во номеров (до 999):</label>
+    <input type="number" id="customCount" min="1" max="999" placeholder="20" />
+
+    <button class="generate-butt" onclick="generatePhoneNumbers(document.getElementById('customCount').value)">Сгенерировать</button>
+    <br />
+
+    <button class="generate-butt" onclick="generatePhoneNumbers(1)">1 номер</button>
+    <button class="generate-butt" onclick="generatePhoneNumbers(5)">5 номеров</button>
+    <button class="generate-butt" onclick="generatePhoneNumbers(10)">10 номеров</button>
+    <br />
+
+    <input type="file" id="uploadTxt" accept=".txt" onchange="loadFromTxt()" />
+    <button class="export-butt" onclick="exportToExcel()">Экспорт в Excel</button>
+    <button class="export-butt" onclick="exportToTxt()">Экспорт в TXT</button>
+    <button class="export-butt" onclick="clearCallHistory()">Очистить всё</button>
+
+    <h4>Фильтры:</h4>
+    <button class="filter-button" onclick="filterNumbers('all')">Все</button>
+    <button class="filter-button" onclick="filterNumbers('alive')">Живые</button>
+    <button class="filter-button" onclick="filterNumbers('bad')">Не рабочие</button>
+    <button class="filter-button" onclick="filterNumbers('uncalled')">Без звонка</button>
+
+    <h3>Сгенерированные номера:</h3>
+    <div id="phoneList" class="phone-list"></div>
+
+    <h3>Список номеров:</h3>
+    <div id="numberList" class="number-list"></div>
+  </div>
+
+  
+  <script src="https://cdn.sheetjs.com/xlsx-0.18.5/package/dist/xlsx.full.min.js"></script>
   <script>
-    function loadCalledNumbers() {
+    let allNumbers = [];
+
+    function loadStatus() {
       try {
-        const data = JSON.parse(localStorage.getItem("calledNumbers"));
-        return Array.isArray(data) ? data : [];
-      } catch (e) {
-        return [];
+        return JSON.parse(localStorage.getItem("numberStatus")) || {};
+      } catch {
+        return {};
       }
     }
 
-    function saveCalledNumber(number) {
-      const calledNumbers = loadCalledNumbers();
-      if (!calledNumbers.includes(number)) {
-        calledNumbers.push(number);
-        localStorage.setItem("calledNumbers", JSON.stringify(calledNumbers));
-      }
+    function saveStatus(status) {
+      localStorage.setItem("numberStatus", JSON.stringify(status));
     }
 
-    function generatePhoneNumbers(count = 1) {
-      const prefix = document.getElementById("prefix").value;
-      const prefixLength = prefix.length;
-      const missingDigits = 11 - prefixLength;
+    function updateStatus(number, state) {
+      const status = loadStatus();
+      status[number] = state;
+      saveStatus(status);
+      renderList(allNumbers);
+    }
 
-      if (!prefix.startsWith("7")) {
-        alert("Префикс должен начинаться с '7'");
+    function generatePhoneNumbers(count) {
+      const prefix = document.getElementById("prefix").value.trim();
+      const quantity = parseInt(count);
+      if (!prefix.startsWith("7") || prefix.length > 10) {
+        alert("Префикс должен начинаться с '7' и содержать максимум 10 цифр.");
         return;
       }
-      if (prefixLength < 4 || prefixLength > 9) {
-        alert("Введите от 4 до 9 цифр в префиксе.");
+      if (isNaN(quantity) || quantity < 1 || quantity > 999) {
+        alert("Введите корректное количество номеров (1–999).");
         return;
       }
 
+      const missingDigits = 11 - prefix.length;
+      const newNumbers = [];
+      for (let i = 0; i < quantity; i++) {
+        const rand = Math.floor(Math.pow(10, missingDigits - 1) + Math.random() * 9 * Math.pow(10, missingDigits - 1));
+        const fullNum = prefix + rand;
+        newNumbers.push(fullNum);
+      }
+      allNumbers = newNumbers;
+      renderList(newNumbers);
+    }
+
+    function renderList(numbers, filter = 'all') {
       const phoneList = document.getElementById("phoneList");
       const numberList = document.getElementById("numberList");
       phoneList.innerHTML = "";
       numberList.innerText = "";
 
-      const numbersText = ["Список номеров:"];
-      const calledNumbers = loadCalledNumbers();
+      const status = loadStatus();
+      const lines = [];
 
-      for (let i = 0; i < count; i++) {
-        const randomNumber = Math.floor(Math.pow(10, missingDigits - 1) + Math.random() * (Math.pow(10, missingDigits) - Math.pow(10, missingDigits - 1)));
-        const fullNumber = prefix + randomNumber;
-        const isCalled = calledNumbers.includes(fullNumber);
+      numbers.forEach(num => {
+        const s = status[num] || 'uncalled';
+        if (filter !== 'all' && s !== filter) return;
 
-        const phoneItem = document.createElement("div");
-        phoneItem.className = "phone-item" + (isCalled ? " called" : "");
-        phoneItem.innerHTML = `
-          <span>${fullNumber}</span>
-          <button class='call-button' onclick='callNumber("${fullNumber}", this)'>Позвонить</button>`;
-        phoneList.appendChild(phoneItem);
+        const div = document.createElement("div");
+        div.className = `phone-item ${s === 'called' ? 'called' : s === 'bad' ? 'bad-number' : s === 'alive' ? 'alive-number' : ''}`;
+        
+        div.innerHTML = `
+          <div class="number">
+            <span>${num}</span>
+          </div>
+          <div class="buttons">
+            <button class="call-button" onclick="callNumber('${num}')">Позвонить</button>
+            <button class="bad-button" onclick="updateStatus('${num}', 'bad')">Не рабочий</button>
+            <button class="alive-button" onclick="updateStatus('${num}', 'alive')">Не взял</button>
+          </div>
+        `;
+        
+        phoneList.appendChild(div);
 
-        numbersText.push(`${i + 1}. ${fullNumber}${isCalled ? " (Уже звонили)" : ""}`);
-      }
+        let label = "";
+        if (s === "bad") label = " (нерабочий)";
+        if (s === "alive") label = " (живой)";
+        lines.push(num + label);
+      });
 
-      numberList.innerText = numbersText.join("\n");
+      numberList.innerText = lines.join("\n");
     }
 
-    function callNumber(number, buttonElement) {
-      const sipLink = `sip:${number}`;
-      window.location.href = sipLink;
-
+    function callNumber(number) {
       try {
-        const link = document.createElement('a');
-        link.href = sipLink;
+        const link = document.createElement("a");
+        link.href = "sip:" + number;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
       } catch (e) {
-        console.error("Не удалось инициировать звонок:", e);
-        alert("Не удалось инициировать звонок. Убедитесь, что MicroSIP установлен и зарегистрирован.");
+        alert("Ошибка при попытке SIP-звонка. Убедитесь, что MicroSIP установлен.");
       }
-
-      saveCalledNumber(number);
-
-      const item = buttonElement.closest('.phone-item');
-      if (item && !item.classList.contains("called")) {
-        item.classList.add("called");
-      }
+      updateStatus(number, "called");
     }
-    function generateCustomAmount() {
-  const countInput = document.getElementById("customCount").value;
-  const count = parseInt(countInput);
-
-  if (isNaN(count) || count < 1 || count > 999) {
-    alert("Введите корректное количество от 1 до 999.");
-    return;
-  }
-
-  generatePhoneNumbers(count);
-}
-
 
     function clearCallHistory() {
-      localStorage.removeItem("calledNumbers");
-      alert("История звонков очищена.");
-      document.getElementById("phoneList").innerHTML = "";
-      document.getElementById("numberList").innerText = "";
+      if (confirm("Удалить все статусы и очистить список?")) {
+        localStorage.removeItem("numberStatus");
+        allNumbers = [];
+        document.getElementById("phoneList").innerHTML = "";
+        document.getElementById("numberList").innerText = "";
+      }
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      alert("Для работы функции 'Позвонить' необходимо:\n1. Установить MicroSIP\n2. В настройках MicroSIP разрешить обработку SIP-ссылок\n3. Перезагрузить компьютер после установки");
-    });
+    function filterNumbers(state) {
+      renderList(allNumbers, state);
+    }
+
+    function exportToExcel() {
+    if (typeof XLSX === 'undefined') {
+        alert("Библиотека для экспорта не загружена. Пожалуйста, обновите страницу.");
+        return;
+    }
+
+    if (allNumbers.length === 0) {
+        alert("Нет номеров для экспорта.");
+        return;
+    }
+
+    const status = loadStatus();
+    const data = allNumbers.map(num => ({
+        "Номер телефона": num,
+        "Статус": status[num] === 'called' ? 'Позвонили' : 
+                 status[num] === 'bad' ? 'Не рабочий' : 
+                 status[num] === 'alive' ? 'Живой' : 'Не звонили'
+    }));
+
+    try {
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Телефонные номера");
+        XLSX.writeFile(workbook, "телефонные_номера.xlsx");
+    } catch (error) {
+        console.error("Ошибка экспорта:", error);
+        alert("Ошибка при экспорте: " + error.message);
+    }
+}
+
+    function exportToTxt() {
+      const status = loadStatus(); // Загружаем статусы номеров
+      const phoneItems = document.querySelectorAll(".phone-item span");
+      const lines = [];
+
+      phoneItems.forEach(span => {
+        const number = span.textContent.replace(/\s*\(.*?\)\s*/g, '').trim();
+        let label = "";
+
+        if (span.closest('.bad-number')) {
+          label = " (нерабочий)";
+        } else if (span.closest('.alive-number')) {
+          label = " (живой)";
+        } else if (span.closest('.called')) {
+          label = " (звонили)";
+        }
+
+        lines.push(`${number}${label}`);
+      });
+
+      if (lines.length === 0) {
+        alert("Нет номеров для экспорта.");
+        return;
+      }
+
+      const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "номера.txt";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function loadFromTxt() {
+      const fileInput = document.getElementById("uploadTxt");
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const text = e.target.result;
+        const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+        const filtered = lines.filter(line => /^7\d{10}$/.test(line));
+        allNumbers = filtered;
+        renderList(filtered);
+      };
+      reader.readAsText(file);
+    }
+
+    // Wait for all scripts to load before running any code
+    window.onload = function() {
+      // This is where we can execute any code after page and all resources have loaded
+    };
   </script>
-</head>
-<body>
-  <div class="container">
-    <h2>Генератор случайных телефонных номеров</h2>
-    <label for="prefix">Введите префикс (4-9 цифр, например, 7495):</label>
-    <input type="text" id="prefix" placeholder="7495" />
-    <br />
+  
 
-    <label for="customCount">Введите количество номеров (до 999):</label>
-    <input type="number" id="customCount" min="1" max="999" placeholder="например, 42" />
-    <button onclick="generateCustomAmount()">Сгенерировать своё количество</button>
-    <br />
-
-    <button onclick="generatePhoneNumbers(1)">Сгенерировать 1 номер</button>
-    <button onclick="generatePhoneNumbers(5)">Сгенерировать 5 номеров</button>
-    <button onclick="generatePhoneNumbers(10)">Сгенерировать 10 номеров</button>
-    <button onclick="clearCallHistory()">Очистить историю звонков</button>
-    <h3>Сгенерированные номера:</h3>
-    <div id="phoneList" class="phone-list"></div>
-    <h3>Список номеров для копирования:</h3>
-    <div id="numberList" class="number-list"></div>
-  </div>
 </body>
 </html>
