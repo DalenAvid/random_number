@@ -249,3 +249,51 @@ document.getElementById("themeToggle").addEventListener("click", () => {
         };
         reader.readAsText(file);
       }
+
+      function loadFromExcel() {
+        const fileInput = document.getElementById("uploadExcel");
+        const file = fileInput.files[0];
+        if (!file) return;
+      
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            // Получаем первую страницу
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            
+            // Конвертируем в JSON
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+            
+            // Извлекаем номера телефонов
+            const numbers = [];
+            jsonData.forEach(row => {
+              // Ищем столбец с номером телефона (может быть в любом поле)
+              for (const key in row) {
+                const value = String(row[key]).trim();
+                if (/^7\d{10}$/.test(value)) {
+                  numbers.push(value);
+                  break;
+                }
+              }
+            });
+      
+            if (numbers.length === 0) {
+              alert("Не найдено подходящих номеров телефонов в формате 7XXXXXXXXXX");
+              return;
+            }
+      
+            allNumbers = numbers;
+            saveToHistory(numbers);
+            renderList(numbers);
+            alert(`Успешно загружено ${numbers.length} номеров из Excel файла`);
+      
+          } catch (error) {
+            console.error("Ошибка при чтении Excel файла:", error);
+            alert("Ошибка при чтении Excel файла: " + error.message);
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }

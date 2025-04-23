@@ -32,6 +32,9 @@
     <label for="uploadTxt"> Загрузить .txt
       <input type="file" id="uploadTxt" name="uploadTxt" accept=".txt" onchange="loadFromTxt()" />
     </label>
+    <label for="uploadExcel"> Загрузить .xlsx
+      <input type="file" id="uploadExcel" name="uploadExcel" accept=".xlsx,.xls" onchange="loadFromExcel()" />
+    </label>
     <button class="export-butt" onclick="exportToExcel()">Экспорт в Excel</button>
     <button class="export-butt" onclick="exportToTxt()">Экспорт в TXT</button>
     <button class="history-butt" onclick="showAllHistoryNumbers()">Вся история номеров</button>
