@@ -41,6 +41,8 @@
     <button class="export-butt" onclick="clearCallHistory()">Очистить всё</button>
 
     <h4>Фильтры:</h4>
+    <label for="searchInput">🔍 Поиск по номеру:</label>
+<input type="text" id="searchInput" placeholder="Введите номер..." oninput="searchPhoneNumber()" />
     <button class="filter-button" onclick="filterNumbers('all')">Все</button>
     <button class="filter-button" onclick="filterNumbers('alive')">Живые</button>
     <button class="filter-button" onclick="filterNumbers('bad')">Не рабочие</button>
@@ -50,6 +52,12 @@
     <div id="statusSummary" class="status-summary"></div>
 
     <div id="phoneList" class="phone-list"></div>
+ <!-- Добавляем элементы пагинации -->
+ <div class="pagination-controls">
+  <button class="pag-butt" id="prevPage" disabled>Назад</button>
+  <span id="pageInfo">Страница 1 из 1</span>
+  <button class="pag-butt" id="nextPage" disabled>Вперед</button>
+</div>
 
     <h3>Список номеров:</h3>
     <div id="numberList" class="number-list"></div>

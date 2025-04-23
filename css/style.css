@@ -139,4 +139,16 @@ color: #fff;
     background: #ffd6d6;
     color: #a00;
   }
+  .pagination-controls {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+  }
   
+  .pagination-controls button {
+    padding: 5px 15px;
+    cursor: pointer;
+    background-color: darkcyan;
+  }
