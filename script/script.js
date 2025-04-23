@@ -1,3 +1,18 @@
+window.addEventListener("DOMContentLoaded", () => {
+    // Устанавливаем тему
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark-mode");
+    }
+  
+    // Загружаем историю и отображаем
+    const historyNumbers = loadHistory();
+    if (historyNumbers.length > 0) {
+      allNumbers = historyNumbers;
+      renderList(historyNumbers);
+    }
+  });
+  
+
 document.getElementById("themeToggle").addEventListener("click", () => {
     document.body.classList.toggle("dark-mode");
     localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
