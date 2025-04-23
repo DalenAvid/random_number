@@ -110,7 +110,7 @@ document.getElementById("themeToggle").addEventListener("click", () => {
               <span>${num}</span>
             </div>
             <div class="buttons">
-              <button class="call-button" onclick="callNumber('${num}')">Позвонить</button>
+              <button class="call-button" onclick="callNumber('${num}')">📞 Позвонить</button>
               <button class="bad-button" onclick="updateStatus('${num}', 'bad')">Не рабочий</button>
               <button class="alive-button" onclick="updateStatus('${num}', 'alive')">Не взял</button>
             </div>
