@@ -143,6 +143,18 @@
         item.classList.add("called");
       }
     }
+    function generateCustomAmount() {
+  const countInput = document.getElementById("customCount").value;
+  const count = parseInt(countInput);
+
+  if (isNaN(count) || count < 1 || count > 999) {
+    alert("Введите корректное количество от 1 до 999.");
+    return;
+  }
+
+  generatePhoneNumbers(count);
+}
+
 
     function clearCallHistory() {
       localStorage.removeItem("calledNumbers");
@@ -162,6 +174,12 @@
     <label for="prefix">Введите префикс (4-8 цифр, например, 7495):</label>
     <input type="text" id="prefix" placeholder="7495" />
     <br />
+
+    <label for="customCount">Введите количество номеров (до 999):</label>
+    <input type="number" id="customCount" min="1" max="999" placeholder="например, 42" />
+    <button onclick="generateCustomAmount()">Сгенерировать своё количество</button>
+    <br />
+
     <button onclick="generatePhoneNumbers(1)">Сгенерировать 1 номер</button>
     <button onclick="generatePhoneNumbers(5)">Сгенерировать 5 номеров</button>
     <button onclick="generatePhoneNumbers(10)">Сгенерировать 10 номеров</button>
