@@ -105,3 +105,38 @@ color: #fff;
     border-color: #444;
   }
   
+  /*-----------*/
+  .status-summary {
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .status-summary span {
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  
+  .status-uncalled {
+    background: #f0f0f0;
+    color: #333;
+  }
+  
+  .status-called {
+    background: #d4f8d4;
+    color: #2d802d;
+  }
+  
+  .status-alive {
+    background: #fff7cc;
+    color: #a37b00;
+  }
+  
+  .status-bad {
+    background: #ffd6d6;
+    color: #a00;
+  }
+  

@@ -68,26 +68,44 @@ document.getElementById("themeToggle").addEventListener("click", () => {
       function generatePhoneNumbers(count) {
         const prefix = document.getElementById("prefix").value.trim();
         const quantity = parseInt(count);
+      
         if (!prefix.startsWith("7") || prefix.length > 10) {
           alert("Префикс должен начинаться с '7' и содержать максимум 10 цифр.");
           return;
         }
+      
         if (isNaN(quantity) || quantity < 1 || quantity > 999) {
           alert("Введите корректное количество номеров (1–999).");
           return;
         }
-  
+      
         const missingDigits = 11 - prefix.length;
-        const newNumbers = [];
-        for (let i = 0; i < quantity; i++) {
+        const existing = new Set(loadHistory()); // загружаем уже сохранённые номера
+        const newNumbers = new Set();
+      
+        let attempts = 0;
+        const maxAttempts = quantity * 20; // предохранитель от бесконечного цикла
+      
+        while (newNumbers.size < quantity && attempts < maxAttempts) {
           const rand = Math.floor(Math.pow(10, missingDigits - 1) + Math.random() * 9 * Math.pow(10, missingDigits - 1));
           const fullNum = prefix + rand;
-          newNumbers.push(fullNum);
+      
+          if (!existing.has(fullNum) && !newNumbers.has(fullNum)) {
+            newNumbers.add(fullNum);
+          }
+      
+          attempts++;
         }
-        allNumbers = newNumbers;
-        saveToHistory(newNumbers);
-        renderList(newNumbers);
+      
+        if (newNumbers.size < quantity) {
+          alert(`Удалось сгенерировать только ${newNumbers.size} уникальных номеров.`);
+        }
+      
+        allNumbers = Array.from(newNumbers);
+        saveToHistory(allNumbers);
+        renderList(allNumbers);
       }
+      
   
       function showAllHistoryNumbers() {
         const historyNumbers = loadHistory();
@@ -107,19 +125,45 @@ document.getElementById("themeToggle").addEventListener("click", () => {
       function renderList(numbers, filter = 'all') {
         const phoneList = document.getElementById("phoneList");
         const numberList = document.getElementById("numberList");
+        const statusSummary = document.getElementById("statusSummary");
+      
         phoneList.innerHTML = "";
         numberList.innerText = "";
-  
+        if (statusSummary) statusSummary.innerHTML = "";
+      
         const status = loadStatus();
         const lines = [];
-  
+      
+        const counters = {
+          uncalled: 0,
+          called: 0,
+          alive: 0,
+          bad: 0
+        };
+      
         numbers.forEach(num => {
           const s = status[num] || 'uncalled';
           if (filter !== 'all' && s !== filter) return;
-  
+          counters[s] = (counters[s] || 0) + 1;
+        });
+      
+        // Вставляем сводку, если элемент есть
+        if (statusSummary) {
+          statusSummary.innerHTML = `
+            <span class="status-uncalled">Не прозвонено: ${counters.uncalled}</span>
+            <span class="status-called">Прозвонено: ${counters.called}</span>
+            <span class="status-alive">Живые: ${counters.alive}</span>
+            <span class="status-bad">Нерабочие: ${counters.bad}</span>
+          `;
+        }
+      
+        numbers.forEach(num => {
+          const s = status[num] || 'uncalled';
+          if (filter !== 'all' && s !== filter) return;
+      
           const div = document.createElement("div");
           div.className = `phone-item ${s === 'called' ? 'called' : s === 'bad' ? 'bad-number' : s === 'alive' ? 'alive-number' : ''}`;
-          
+      
           div.innerHTML = `
             <div class="number">
               <span>${num}</span>
@@ -130,17 +174,19 @@ document.getElementById("themeToggle").addEventListener("click", () => {
               <button class="alive-button" onclick="updateStatus('${num}', 'alive')">Не взял</button>
             </div>
           `;
-          
+      
           phoneList.appendChild(div);
-  
+      
           let label = "";
           if (s === "bad") label = " (нерабочий)";
           if (s === "alive") label = " (живой)";
+          if (s === "called") label = " (звонили)";
           lines.push(num + label);
         });
-  
+      
         numberList.innerText = lines.join("\n");
       }
+      
   
       function callNumber(number) {
         try {
