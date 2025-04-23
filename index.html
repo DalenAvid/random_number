@@ -11,6 +11,27 @@
       background-color: #f4f4f4;
       padding: 20px;
     }
+    body.dark-mode {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+}
+body.dark-mode .container {
+  background-color: #2c2c2c;
+}
+body.dark-mode input,
+body.dark-mode select {
+  background-color: #444;
+  color: white;
+  border: 1px solid #777;
+}
+body.dark-mode button {
+  opacity: 1;
+}
+body.dark-mode .number-list {
+  background-color: #333;
+  color: #fff;
+}
+
     .container {
       background: white;
       padding: 20px;
@@ -34,6 +55,9 @@
     }
     .export-butt{
       background-color: darkslategray;
+    }
+    .history-butt {
+      background-color: #6a5acd;
     }
     .call-button { background-color: #28a745; }
     .bad-button { background-color: #dc3545; }
@@ -83,6 +107,10 @@
   </style>
 </head>
 <body>
+  <button id="themeToggle" style="position:absolute; top:20px; right:20px; padding:10px; border:none; background:#333; color:white; border-radius:5px; cursor:pointer;">
+    🌙 Тема
+  </button>
+  
   <div class="container">
     <h2>Генератор телефонных номеров</h2>
 
@@ -99,10 +127,13 @@
     <button class="generate-butt" onclick="generatePhoneNumbers(5)">5 номеров</button>
     <button class="generate-butt" onclick="generatePhoneNumbers(10)">10 номеров</button>
     <br />
-
-    <input type="file" id="uploadTxt" accept=".txt" onchange="loadFromTxt()" />
+    
+    <label for="uploadTxt"> Загрузить .txt
+      <input type="file" id="uploadTxt" name="uploadTxt" accept=".txt" onchange="loadFromTxt()" />
+    </label>
     <button class="export-butt" onclick="exportToExcel()">Экспорт в Excel</button>
     <button class="export-butt" onclick="exportToTxt()">Экспорт в TXT</button>
+    <button class="history-butt" onclick="showAllHistoryNumbers()">Вся история номеров</button>
     <button class="export-butt" onclick="clearCallHistory()">Очистить всё</button>
 
     <h4>Фильтры:</h4>
@@ -118,10 +149,21 @@
     <div id="numberList" class="number-list"></div>
   </div>
 
-  
   <script src="https://cdn.sheetjs.com/xlsx-0.18.5/package/dist/xlsx.full.min.js"></script>
   <script>
+    document.getElementById("themeToggle").addEventListener("click", () => {
+  document.body.classList.toggle("dark-mode");
+  localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark-mode");
+  }
+});
+
     let allNumbers = [];
+    const HISTORY_KEY = "phoneNumberHistory";
 
     function loadStatus() {
       try {
@@ -133,6 +175,25 @@
 
     function saveStatus(status) {
       localStorage.setItem("numberStatus", JSON.stringify(status));
+    }
+
+    function saveToHistory(numbers) {
+      let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+      // Добавляем новые номера, исключая дубликаты
+      numbers.forEach(num => {
+        if (!history.includes(num)) {
+          history.push(num);
+        }
+      });
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
+
+    function loadHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+      } catch {
+        return [];
+      }
     }
 
     function updateStatus(number, state) {
@@ -162,7 +223,23 @@
         newNumbers.push(fullNum);
       }
       allNumbers = newNumbers;
+      saveToHistory(newNumbers);
       renderList(newNumbers);
+    }
+
+    function showAllHistoryNumbers() {
+      const historyNumbers = loadHistory();
+      if (historyNumbers.length === 0) {
+        alert("История номеров пуста.");
+        return;
+      }
+      
+      // Отображаем все исторические номера
+      allNumbers = historyNumbers;
+      renderList(historyNumbers, 'all');
+      
+      // Показываем количество номеров в истории
+      alert(`Всего в истории: ${historyNumbers.length} номеров`);
     }
 
     function renderList(numbers, filter = 'all') {
@@ -217,8 +294,9 @@
     }
 
     function clearCallHistory() {
-      if (confirm("Удалить все статусы и очистить список?")) {
+      if (confirm("Удалить ВСЕ данные (номера, статусы, историю)?")) {
         localStorage.removeItem("numberStatus");
+        localStorage.removeItem(HISTORY_KEY);
         allNumbers = [];
         document.getElementById("phoneList").innerHTML = "";
         document.getElementById("numberList").innerText = "";
@@ -230,37 +308,37 @@
     }
 
     function exportToExcel() {
-    if (typeof XLSX === 'undefined') {
-        alert("Библиотека для экспорта не загружена. Пожалуйста, обновите страницу.");
-        return;
-    }
+      if (typeof XLSX === 'undefined') {
+          alert("Библиотека для экспорта не загружена. Пожалуйста, обновите страницу.");
+          return;
+      }
 
-    if (allNumbers.length === 0) {
-        alert("Нет номеров для экспорта.");
-        return;
-    }
+      if (allNumbers.length === 0) {
+          alert("Нет номеров для экспорта.");
+          return;
+      }
 
-    const status = loadStatus();
-    const data = allNumbers.map(num => ({
-        "Номер телефона": num,
-        "Статус": status[num] === 'called' ? 'Позвонили' : 
-                 status[num] === 'bad' ? 'Не рабочий' : 
-                 status[num] === 'alive' ? 'Живой' : 'Не звонили'
-    }));
+      const status = loadStatus();
+      const data = allNumbers.map(num => ({
+          "Номер телефона": num,
+          "Статус": status[num] === 'called' ? 'Позвонили' : 
+                   status[num] === 'bad' ? 'Не рабочий' : 
+                   status[num] === 'alive' ? 'Живой' : 'Не звонили'
+      }));
 
-    try {
-        const worksheet = XLSX.utils.json_to_sheet(data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Телефонные номера");
-        XLSX.writeFile(workbook, "телефонные_номера.xlsx");
-    } catch (error) {
-        console.error("Ошибка экспорта:", error);
-        alert("Ошибка при экспорте: " + error.message);
+      try {
+          const worksheet = XLSX.utils.json_to_sheet(data);
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, "Телефонные номера");
+          XLSX.writeFile(workbook, "телефонные_номера.xlsx");
+      } catch (error) {
+          console.error("Ошибка экспорта:", error);
+          alert("Ошибка при экспорте: " + error.message);
+      }
     }
-}
 
     function exportToTxt() {
-      const status = loadStatus(); // Загружаем статусы номеров
+      const status = loadStatus();
       const phoneItems = document.querySelectorAll(".phone-item span");
       const lines = [];
 
@@ -304,17 +382,11 @@
         const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
         const filtered = lines.filter(line => /^7\d{10}$/.test(line));
         allNumbers = filtered;
+        saveToHistory(filtered);
         renderList(filtered);
       };
       reader.readAsText(file);
     }
-
-    // Wait for all scripts to load before running any code
-    window.onload = function() {
-      // This is where we can execute any code after page and all resources have loaded
-    };
   </script>
-  
-
 </body>
 </html>
