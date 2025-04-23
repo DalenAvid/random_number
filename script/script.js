@@ -69,41 +69,65 @@ document.getElementById("themeToggle").addEventListener("click", () => {
         const prefix = document.getElementById("prefix").value.trim();
         const quantity = parseInt(count);
       
-        if (!prefix.startsWith("7") || prefix.length > 10) {
+        // Проверка префикса
+        if (!/^7\d{0,9}$/.test(prefix)) {
           alert("Префикс должен начинаться с '7' и содержать максимум 10 цифр.");
           return;
         }
       
+        // Проверка количества
         if (isNaN(quantity) || quantity < 1 || quantity > 999) {
           alert("Введите корректное количество номеров (1–999).");
           return;
         }
       
         const missingDigits = 11 - prefix.length;
-        const existing = new Set(loadHistory()); // загружаем уже сохранённые номера
+        const existingNumbers = new Set(loadHistory());
         const newNumbers = new Set();
       
-        let attempts = 0;
-        const maxAttempts = quantity * 20; // предохранитель от бесконечного цикла
-      
-        while (newNumbers.size < quantity && attempts < maxAttempts) {
-          const rand = Math.floor(Math.pow(10, missingDigits - 1) + Math.random() * 9 * Math.pow(10, missingDigits - 1));
-          const fullNum = prefix + rand;
-      
-          if (!existing.has(fullNum) && !newNumbers.has(fullNum)) {
-            newNumbers.add(fullNum);
+        // Если нужно сгенерировать все возможные комбинации (например, 100 для 2 недостающих цифр)
+        const totalPossible = Math.pow(10, missingDigits);
+        
+        if (quantity >= totalPossible) {
+          // Генерируем все возможные номера
+          for (let i = 0; i < totalPossible; i++) {
+            const suffix = String(i).padStart(missingDigits, '0');
+            const fullNum = prefix + suffix;
+            if (!existingNumbers.has(fullNum)) {
+              newNumbers.add(fullNum);
+            }
           }
-      
-          attempts++;
+        } else {
+          // Генерируем случайные уникальные номера
+          const maxAttempts = quantity * 10;
+          let attempts = 0;
+          
+          while (newNumbers.size < quantity && attempts < maxAttempts) {
+            const suffix = Array.from({length: missingDigits}, () => 
+              Math.floor(Math.random() * 10)).join('');
+            const fullNum = prefix + suffix;
+            
+            if (!existingNumbers.has(fullNum)) {
+              newNumbers.add(fullNum);
+            }
+            attempts++;
+          }
         }
       
-        if (newNumbers.size < quantity) {
-          alert(`Удалось сгенерировать только ${newNumbers.size} уникальных номеров.`);
+        // Проверяем результат
+        if (newNumbers.size === 0) {
+          alert("Не удалось сгенерировать новые уникальные номера. Возможно, все комбинации уже использованы.");
+          return;
         }
       
         allNumbers = Array.from(newNumbers);
         saveToHistory(allNumbers);
         renderList(allNumbers);
+      
+        // Информация о результате
+        if (quantity > newNumbers.size) {
+          alert(`Запрошено: ${quantity}\nСгенерировано: ${newNumbers.size}\nНе хватило уникальных комбинаций.`);
+        }
       }
       
   
