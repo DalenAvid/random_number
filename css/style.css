@@ -53,9 +53,9 @@ color: #fff;
   .history-butt {
     background-color: #6a5acd;
   }
-  .call-button { background-color: #28a745; }
-  .bad-button { background-color: #dc3545; }
-  .alive-button { background-color: #ffc107; color: black; }
+  .call-button { background-color: #28a745; border-radius: 50px;}
+  .bad-button { background-color: #dc3545;  border-radius: 50px;}
+  .alive-button { background-color: #ffc107; color: black;  border-radius: 50px;}
   .filter-button { background-color: #007bff; }
   .reset-button { background-color: #6c757d; }
   button:hover {
@@ -157,3 +157,44 @@ color: #fff;
     cursor: pointer;
     background-color: darkcyan;
   }
+  /*копирование*/
+
+  .copy-button {
+    margin-right: 10px;
+    border: none;
+    background: #eee;
+    padding: 5px 8px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  .copy-button:hover {
+    background: #ddd;
+  }
+
+  .copy-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4caf50;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    font-weight: bold;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 9999;
+  }
+  
+  .copy-notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  
+  .copy-notification.error {
+    background: #f44336;
+  }
+  
+  

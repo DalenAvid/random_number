@@ -211,9 +211,10 @@ function renderList(filter = currentFilter) {
     const s = status[num] || 'uncalled';
     const div = document.createElement("div");
     div.className = `phone-item ${s === 'called' ? 'called' : s === 'bad' ? 'bad-number' : s === 'alive' ? 'alive-number' : ''}`;
-
+  
     div.innerHTML = `
       <div class="number">
+        <button class="copy-button" onclick="copyToClipboard('${num}')">📋</button>
         <span>${num}</span>
       </div>
       <div class="buttons">
@@ -222,15 +223,16 @@ function renderList(filter = currentFilter) {
         <button class="alive-button" onclick="updateStatus('${num}', 'alive')">Не взял</button>
       </div>
     `;
-
+  
     phoneList.appendChild(div);
-
+  
     let label = "";
     if (s === "bad") label = " (нерабочий)";
     if (s === "alive") label = " (живой)";
     if (s === "called") label = " (звонили)";
     lines.push(num + label);
   });
+  
 
   numberList.innerText = lines.join("\n");
 }
@@ -414,5 +416,31 @@ function searchPhoneNumber() {
         item.style.display = "none";
       }
     });
+  }
+  
+  /*копирование**/
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      showCopyNotification(`Скопировано: ${text}`);
+    }).catch(err => {
+      console.error('Ошибка копирования:', err);
+      showCopyNotification("Ошибка копирования", true);
+    });
+  }
+  
+  function showCopyNotification(message, isError = false) {
+    let notification = document.createElement("div");
+    notification.className = `copy-notification ${isError ? 'error' : ''}`;
+    notification.innerHTML = `✔️ ${message}`;
+    document.body.appendChild(notification);
+  
+    setTimeout(() => {
+      notification.classList.add("show");
+    }, 10); // задержка для анимации
+  
+    setTimeout(() => {
+      notification.classList.remove("show");
+      setTimeout(() => document.body.removeChild(notification), 300);
+    }, 2000); // 2 секунды видимости
   }
   
