@@ -5,6 +5,7 @@ let currentPage = 1;
 const itemsPerPage = 10;
 let currentFilter = 'all';
 
+
 // Инициализация при загрузке страницы
 window.addEventListener("DOMContentLoaded", () => {
   // Устанавливаем тему
@@ -421,12 +422,14 @@ function searchPhoneNumber() {
   /*копирование**/
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
+      updateStatus(text, "called"); // 👈 Обновляем статус
       showCopyNotification(`Скопировано: ${text}`);
     }).catch(err => {
       console.error('Ошибка копирования:', err);
       showCopyNotification("Ошибка копирования", true);
     });
   }
+  
   
   function showCopyNotification(message, isError = false) {
     let notification = document.createElement("div");
