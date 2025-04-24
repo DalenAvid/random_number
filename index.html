@@ -14,7 +14,7 @@
   </button>
   
   <div class="container">
-    <h2>Генератор телефонных номеров</h2>
+    <h1>🦅Генератор телефонных номеров</h1>
 
     <label for="prefix">Префикс (например, 7495):</label>
     <input type="text" id="prefix" placeholder="7495" />
@@ -30,17 +30,18 @@
     <button class="generate-butt" onclick="generatePhoneNumbers(10)">10 номеров</button>
     <br />
     
-    <label for="uploadTxt"> Загрузить .txt
+    <label for="uploadTxt">📥 Загрузить .txt
       <input type="file" id="uploadTxt" name="uploadTxt" accept=".txt" onchange="loadFromTxt()" />
     </label>
-    <label for="uploadExcel"> Загрузить .xlsx
+    <label for="uploadExcel">📥 Загрузить .xlsx
       <input type="file" id="uploadExcel" name="uploadExcel" accept=".xlsx,.xls" onchange="loadFromExcel()" />
     </label>
-    <button class="export-butt" onclick="exportToExcel()">Экспорт в Excel</button>
-    <button class="export-butt" onclick="exportToTxt()">Экспорт в TXT</button>
-    <button class="history-butt" onclick="showAllHistoryNumbers()">Вся история номеров</button>
-    <button class="export-butt" onclick="clearCallHistory()">Очистить всё</button>
-
+    <button class="export-butt" onclick="exportToExcel()">📤 Экспорт в Excel</button>
+    <button class="export-butt" onclick="exportToTxt()"> 📤 Экспорт в TXT</button>
+    <div>
+    <button class="history-butt" onclick="showAllHistoryNumbers()">Вся история номеров 📋</button>
+    <button class="export-butt" onclick="clearCallHistory()">🧹 Очистить всё</button>
+  </div>
     <h4>Фильтры:</h4>
     <label for="searchInput">🔍 Поиск по номеру:</label>
 <input type="text" id="searchInput" placeholder="Введите номер..." oninput="searchPhoneNumber()" />

@@ -42,6 +42,7 @@ color: #fff;
     border-radius: 5px;
     cursor: pointer;
     color: white;
+    transition: .1s;
   }
   .generate-butt{
     background-color: #0763c6;
@@ -57,7 +58,11 @@ color: #fff;
   .alive-button { background-color: #ffc107; color: black; }
   .filter-button { background-color: #007bff; }
   .reset-button { background-color: #6c757d; }
-  button:hover { opacity: 0.9; }
+  button:hover {
+     opacity: 0.9;
+     transform: scale(1.1);
+     transition: .1s;
+ }
   .phone-list {
     margin-top: 20px;
     text-align: left;
