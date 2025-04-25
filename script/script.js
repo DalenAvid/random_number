@@ -234,31 +234,45 @@ function renderList(filter = currentFilter) {
     const div = document.createElement("div");
     div.className = `phone-item ${s === 'called' ? 'called' : s === 'bad' ? 'bad-number' : s === 'alive' ? 'alive-number' : s === 'cut' ? 'cut-number' : ''}`;
   
-    let label = "";
-    if (s === "bad") label = " (нерабочий)";
-    if (s === "alive") label = "(Живой)";
-    if (s === "called") label = " (звонили)";
-    if (s === "cut") label = " <span class='cut-label'>(срез)</span>";
+    // Текстовая метка
+    let labelText = "";
+    // HTML метка
+    let labelHtml = "";
+  
+    if (s === "bad") {
+      labelText = " (нерабочий)";
+      labelHtml = " (нерабочий)";
+    }
+    if (s === "alive") {
+      labelText = " (живой)";
+      labelHtml = " ";
+    }
+    if (s === "called") {
+      labelText = " (звонили)";
+      labelHtml = " (звонили)";
+    }
+    if (s === "cut") {
+      labelText = " (срез)";
+      labelHtml = " <span class='cut-label'>(срез)</span>";
+    }
   
     div.innerHTML = `
       <div class="number">
         <button class="copy-button" onclick="copyToClipboard('${num}')">📋</button>
-        <span>${num}</span> ${label}
+        <span>${num}</span> ${labelHtml}
       </div>
       <div class="buttons">
         <button class="call-button" onclick="callNumber('${num}')">📞 Позвонить</button>
         <button class="bad-button" onclick="updateStatus('${num}', 'bad')">Не рабочий</button>
         <button class="alive-button" onclick="updateStatus('${num}', 'alive')">Не взял</button>
         <button class="cut-button" onclick="updateStatus('${num}', 'cut')">✂️ Срез</button>
-       
       </div>
     `;
   
     phoneList.appendChild(div);
-  
-    lines.push(num + label.replace(/<[^>]+>/g, '')); // убираем HTML из текста для текстового списка
+    lines.push(num + labelText); // ТОЛЬКО текстовая версия
   });
-
+  
   numberList.innerText = lines.join("\n");
   
 }
