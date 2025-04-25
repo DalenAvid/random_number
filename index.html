@@ -9,7 +9,9 @@
   <script src="./script/script.js" defer></script>
 </head>
 <body>
-  
+  <button id="checkButton" style="position:fixed; top:20px; left:20px; padding:10px; border:none; background:#007bff; color:white; border-radius:5px; cursor:pointer; z-index:1000;">
+    ✅ Проверка
+  </button>
   <button id="themeToggle" style="position:absolute; top:20px; right:20px; padding:10px; border:none; background:#333; color:white; border-radius:5px; cursor:pointer;">
     🌙 Тема
   </button>
@@ -66,7 +68,15 @@
     <h3>Список номеров:</h3>
     <div id="numberList" class="number-list"></div>
   </div>
-
+  <!--check-->
+  <div id="checkModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeCheckModal()">&times;</span>
+      <h2>Номера для проверки</h2>
+      <div id="checkPhoneList"></div>
+    </div>
+  </div>
+  
   <script src="https://cdn.sheetjs.com/xlsx-0.18.5/package/dist/xlsx.full.min.js"></script>
  
 </body>

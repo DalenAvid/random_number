@@ -487,6 +487,39 @@ function searchPhoneNumber() {
     }, 2000); // 2 секунды видимости
   }
   
-  /******Login*******/
+  /******Check*******/
 
+  document.getElementById('checkButton').addEventListener('click', showCheckModal);
+
+  function showCheckModal() {
+    const modal = document.getElementById('checkModal');
+    const checkPhoneList = document.getElementById('checkPhoneList');
   
+    // Статичный список нужных номеров
+    const fixedNumbers = [
+      { number: '78127402640', label: 'Ибис СПБ' },
+      { number: '74956607500', label: 'Ибис МСК' },
+      { number: '+7 (495) 797-87-16', label: 'Библиотека' }
+    ];
+  
+    checkPhoneList.innerHTML = '';
+  
+    fixedNumbers.forEach(entry => {
+      const div = document.createElement('div');
+      div.className = 'modal-phone-item';
+      div.innerHTML = `
+        <div>
+          <strong>${entry.number}</strong> ${entry.label ? `– ${entry.label}` : ''}
+        </div>
+        <button onclick="callNumber('${entry.number}')">📞 Позвонить</button>
+      `;
+      checkPhoneList.appendChild(div);
+    });
+  
+    modal.style.display = 'block';
+  }
+  
+
+function closeCheckModal() {
+  document.getElementById('checkModal').style.display = 'none';
+}
