@@ -499,7 +499,9 @@ function searchPhoneNumber() {
     const fixedNumbers = [
       { number: '78127402640', label: 'Ибис СПБ' },
       { number: '74956607500', label: 'Ибис МСК' },
-      { number: '+7 (495) 797-87-16', label: 'Библиотека' }
+      { number: '+7 (495) 797-87-16', label: 'Библиотека' },
+      { number: '74959999999', label: 'Яндекс такси' },
+      
     ];
   
     checkPhoneList.innerHTML = '';
@@ -523,3 +525,7 @@ function searchPhoneNumber() {
 function closeCheckModal() {
   document.getElementById('checkModal').style.display = 'none';
 }
+
+
+/*пагинация*/
+
