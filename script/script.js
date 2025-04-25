@@ -289,18 +289,32 @@ function updatePaginationInfo(totalFiltered) {
 
 // Звонок по номеру
 function callNumber(number) {
-  try {
-    const link = document.createElement("a");
-    link.href = "sip:" + number;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (e) {
-    alert("Ошибка при попытке SIP-звонка. Убедитесь, что MicroSIP установлен.");
+    try {
+      const link = document.createElement("a");
+      link.href = "sip:" + number;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e) {
+      alert("Ошибка при попытке SIP-звонка. Убедитесь, что MicroSIP установлен.");
+    }
+  
+    updateStatus(number, "called");
+  
+    // ✅ Удалим выделение у всех других номеров
+    document.querySelectorAll(".phone-item").forEach(item => {
+      item.classList.remove("calling-now");
+    });
+  
+    // ✅ Найдём и выделим текущий
+    const matchingItem = Array.from(document.querySelectorAll(".phone-item"))
+      .find(item => item.querySelector(".number span").textContent === number);
+    
+    if (matchingItem) {
+      matchingItem.classList.add("calling-now");
+    }
   }
-  updateStatus(number, "called");
-}
-
+  
 // Фильтрация номеров
 function filterNumbers(state) {
   currentPage = 1;

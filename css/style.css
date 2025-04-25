@@ -320,3 +320,8 @@ color: #fff;
     cursor: pointer;
   }
   
+  .calling-now {
+    background-color: rgba(103, 101, 101, 0.222); /* серый с прозрачностью */
+    transition: background-color 0.3s;
+  }
+  
