@@ -232,7 +232,7 @@ function renderList(filter = currentFilter) {
   
     let label = "";
     if (s === "bad") label = " (нерабочий)";
-    if (s === "alive") label = " ";
+    if (s === "alive") label = "(Живой)";
     if (s === "called") label = " (звонили)";
     if (s === "cut") label = " <span class='cut-label'>(срез)</span>";
   
