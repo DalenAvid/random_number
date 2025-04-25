@@ -541,5 +541,22 @@ function closeCheckModal() {
 }
 
 
-/*пагинация*/
+/*футер*/
 
+window.addEventListener("DOMContentLoaded", () => {
+    const footer = document.getElementById("updateFooter");
+    const now = new Date();
+  
+    const formatted = now.toLocaleString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  
+    if (footer) {
+      footer.textContent = `Страница была обновлена в – ${formatted}`;
+    }
+  });
+  

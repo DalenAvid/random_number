@@ -325,3 +325,12 @@ color: #fff;
     transition: background-color 0.3s;
   }
   
+  .footer {
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    color: gray;
+    margin-top: 20px;
+    border-top: 1px solid #ccc;
+  }
+  
