@@ -206,8 +206,10 @@ function renderList(filter = currentFilter) {
     uncalled: 0,
     called: 0,
     alive: 0,
-    bad: 0
+    bad: 0,
+    cut: 0
   };
+  
 
   allNumbers.forEach(num => {
     const s = status[num] || 'uncalled';
@@ -217,11 +219,13 @@ function renderList(filter = currentFilter) {
   // Отображаем сводку по статусам
   if (statusSummary) {
     statusSummary.innerHTML = `
-      <span class="status-uncalled">Не прозвонено: ${counters.uncalled}</span>
-      <span class="status-called">Прозвонено: ${counters.called}</span>
-      <span class="status-alive">Живые: ${counters.alive}</span>
-      <span class="status-bad">Нерабочие: ${counters.bad}</span>
-    `;
+  <span class="status-uncalled">Не прозвонено: ${counters.uncalled}</span>
+  <span class="status-called">Прозвонено: ${counters.called}</span>
+  <span class="status-alive">Живые: ${counters.alive}</span>
+  <span class="status-bad">Нерабочие: ${counters.bad}</span>
+  <span class="status-cut">Срезанные: ${counters.cut}</span>
+`;
+
   }
 
   // Отрисовываем номера на текущей странице

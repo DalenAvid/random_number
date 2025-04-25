@@ -236,3 +236,9 @@ color: #fff;
     border-left: 3px solid #0bed4f;
     padding-left: 6px;
   }
+
+  .status-cut {
+    color: #2196f3;
+    font-weight: bold;
+  }
+  
