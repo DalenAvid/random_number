@@ -241,4 +241,23 @@ color: #fff;
     color: #2196f3;
     font-weight: bold;
   }
+  /* Адаптивность */
+@media (max-width: 768px) {
+    .call-button,
+    .bad-button,
+    .alive-button,
+    .cut-button {
+      font-size: 0.85rem;
+      padding: 5px 8px;
+    }
+  }
   
+  @media (max-width: 480px) {
+    .call-button,
+    .bad-button,
+    .alive-button,
+    .cut-button {
+      font-size: 0.75rem;
+      padding: 4px 6px;
+    }
+  }
