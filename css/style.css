@@ -54,6 +54,7 @@ color: #fff;
     background-color: #6a5acd;
   }
   .call-button { background-color: #28a745; border-radius: 50px;}
+  
   .bad-button { background-color: #dc3545;  border-radius: 50px;}
   .alive-button { background-color: #ffc107; color: black;  border-radius: 50px;}
   .filter-button { background-color: #007bff; }
@@ -223,3 +224,15 @@ color: #fff;
     padding-left: 6px;
   }
   
+  .alive-number .number {
+    border-left: 3px solid #e0fc0d;
+    padding-left: 6px;
+  }
+  .bad-number .number {
+    border-left: 3px solid #ce1111;
+    padding-left: 6px;
+  }
+  .called-number .number {
+    border-left: 3px solid #0bed4f;
+    padding-left: 6px;
+  }
