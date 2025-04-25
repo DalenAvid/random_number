@@ -84,64 +84,81 @@ function updateStatus(number, state) {
 
 // Генерация телефонных номеров
 function generatePhoneNumbers(count) {
-  const prefix = document.getElementById("prefix").value.trim();
-  const quantity = parseInt(count);
-
-  if (!/^7\d{0,9}$/.test(prefix)) {
-    alert("Префикс должен начинаться с '7' и содержать максимум 10 цифр.");
-    return;
-  }
-
-  if (isNaN(quantity) || quantity < 1 || quantity > 999) {
-    alert("Введите корректное количество номеров (1–999).");
-    return;
-  }
-
-  const missingDigits = 11 - prefix.length;
-  const existingNumbers = new Set(loadHistory());
-  const newNumbers = new Set();
-
-  const totalPossible = Math.pow(10, missingDigits);
+    const prefix = document.getElementById("prefix").value.trim();
+    const quantity = parseInt(count);
   
-  if (quantity >= totalPossible) {
-    for (let i = 0; i < totalPossible; i++) {
-      const suffix = String(i).padStart(missingDigits, '0');
-      const fullNum = prefix + suffix;
-      if (!existingNumbers.has(fullNum)) {
-        newNumbers.add(fullNum);
-      }
+    if (!/^7\d{0,9}$/.test(prefix)) {
+      alert("Префикс должен начинаться с '7' и содержать максимум 10 цифр.");
+      return;
     }
-  } else {
-    const maxAttempts = quantity * 10;
-    let attempts = 0;
+  
+    if (isNaN(quantity) || quantity < 1 || quantity > 999) {
+      alert("Введите корректное количество номеров (1–999).");
+      return;
+    }
+  
+    const missingDigits = 11 - prefix.length;
+    const existingNumbers = new Set(loadHistory());
+    const newNumbers = new Set();
+  
+    const totalPossible = Math.pow(10, missingDigits);
     
-    while (newNumbers.size < quantity && attempts < maxAttempts) {
-      const suffix = Array.from({length: missingDigits}, () => 
-        Math.floor(Math.random() * 10)).join('');
-      const fullNum = prefix + suffix;
-      
-      if (!existingNumbers.has(fullNum)) {
-        newNumbers.add(fullNum);
+    // Создаем массив всех возможных суффиксов
+    const allPossibleSuffixes = [];
+    for (let i = 0; i < totalPossible; i++) {
+      allPossibleSuffixes.push(String(i).padStart(missingDigits, '0'));
+    }
+  
+    // Перемешиваем массив суффиксов
+    shuffleArray(allPossibleSuffixes);
+  
+    if (quantity >= totalPossible) {
+      // Если запрошено больше или равно чем возможно, берем все перемешанные
+      for (const suffix of allPossibleSuffixes) {
+        const fullNum = prefix + suffix;
+        if (!existingNumbers.has(fullNum)) {
+          newNumbers.add(fullNum);
+        }
       }
-      attempts++;
+    } else {
+      // Берем только необходимое количество из перемешанного массива
+      let added = 0;
+      for (const suffix of allPossibleSuffixes) {
+        if (added >= quantity) break;
+        
+        const fullNum = prefix + suffix;
+        if (!existingNumbers.has(fullNum)) {
+          newNumbers.add(fullNum);
+          added++;
+        }
+      }
+    }
+  
+    if (newNumbers.size === 0) {
+      alert("Не удалось сгенерировать новые уникальные номера. Возможно, все комбинации уже использованы.");
+      return;
+    }
+  
+    // Преобразуем Set в массив и дополнительно перемешиваем на случай если взяли подпоследовательность
+    allNumbers = Array.from(newNumbers);
+    shuffleArray(allNumbers);
+    
+    saveToHistory(allNumbers);
+    currentPage = 1;
+    renderList();
+  
+    if (quantity > newNumbers.size) {
+      alert(`Запрошено: ${quantity}\nСгенерировано: ${newNumbers.size}\nНе хватило уникальных комбинаций.`);
     }
   }
-
-  if (newNumbers.size === 0) {
-    alert("Не удалось сгенерировать новые уникальные номера. Возможно, все комбинации уже использованы.");
-    return;
+  
+  // Функция для перемешивания массива (алгоритм Фишера-Йетса)
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
   }
-
-  allNumbers = Array.from(newNumbers);
-  saveToHistory(allNumbers);
-  currentPage = 1;
-  renderList();
-
-  if (quantity > newNumbers.size) {
-    alert(`Запрошено: ${quantity}\nСгенерировано: ${newNumbers.size}\nНе хватило уникальных комбинаций.`);
-  }
-}
-
 // Показать всю историю номеров
 function showAllHistoryNumbers() {
   const historyNumbers = loadHistory();
@@ -446,4 +463,7 @@ function searchPhoneNumber() {
       setTimeout(() => document.body.removeChild(notification), 300);
     }, 2000); // 2 секунды видимости
   }
+  
+  /******Login*******/
+
   
