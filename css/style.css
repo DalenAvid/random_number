@@ -197,6 +197,29 @@ color: #fff;
     background: #f44336;
   }
   
-  /*///////////////Login///////////////*/
-
+  /*/////////////////////////////*/
+  .cut-button {
+    background-color: #2196f3;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 6px;
+    margin-left: 5px;
+    cursor: pointer;
+  }
+  
+  .cut-button:hover {
+    background-color: #1976d2;
+  }
+  
+  .cut-label {
+    color: #2196f3;
+    font-weight: bold;
+    margin-left: 4px;
+  }
+  
+  .cut-number .number {
+    border-left: 3px solid #2196f3;
+    padding-left: 6px;
+  }
   
