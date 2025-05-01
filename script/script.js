@@ -83,37 +83,76 @@ function updateStatus(number, state) {
 }
 
 // Генерация телефонных номеров
+// Генерация телефонных номеров с учетом диапазона
 function generatePhoneNumbers(count) {
-    const prefix = document.getElementById("prefix").value.trim();
-    const quantity = parseInt(count);
-  
-    if (!/^7\d{0,9}$/.test(prefix)) {
-      alert("Префикс должен начинаться с '7' и содержать максимум 10 цифр.");
+  const prefix = document.getElementById("prefix").value.trim();
+  const quantity = parseInt(count);
+  const rangeStart = parseInt(document.getElementById("rangeStart").value);
+  const rangeEnd = parseInt(document.getElementById("rangeEnd").value);
+
+  if (!/^7\d{0,9}$/.test(prefix)) {
+    alert("Префикс должен начинаться с '7' и содержать максимум 10 цифр.");
+    return;
+  }
+
+  if (isNaN(quantity) || quantity < 1 || quantity > 999) {
+    alert("Введите корректное количество номеров (1–999).");
+    return;
+  }
+
+  // Проверка диапазона, если указан
+  let useRange = false;
+  if (!isNaN(rangeStart) && !isNaN(rangeEnd)) {
+    if (rangeStart >= rangeEnd) {
+      alert("Начало диапазона должно быть меньше конца");
       return;
     }
-  
-    if (isNaN(quantity) || quantity < 1 || quantity > 999) {
-      alert("Введите корректное количество номеров (1–999).");
+    if (rangeStart < 0 || rangeEnd > 9999) {
+      alert("Диапазон должен быть между 0000 и 9999");
       return;
     }
-  
-    const missingDigits = 11 - prefix.length;
-    const existingNumbers = new Set(loadHistory());
-    const newNumbers = new Set();
-  
-    const totalPossible = Math.pow(10, missingDigits);
+    useRange = true;
+  }
+
+  const missingDigits = 11 - prefix.length;
+  const existingNumbers = new Set(loadHistory());
+  const newNumbers = new Set();
+
+  if (useRange) {
+    // Генерация в указанном диапазоне
+    const rangeSize = rangeEnd - rangeStart + 1;
     
-    // Создаем массив всех возможных суффиксов
+    if (quantity > rangeSize) {
+      alert(`Запрошено ${quantity} номеров, но в диапазоне только ${rangeSize} возможных комбинаций.`);
+      return;
+    }
+    
+    // Создаем массив всех чисел в диапазоне и перемешиваем
+    const rangeNumbers = [];
+    for (let i = rangeStart; i <= rangeEnd; i++) {
+      rangeNumbers.push(String(i).padStart(missingDigits, '0'));
+    }
+    shuffleArray(rangeNumbers);
+    
+    // Берем нужное количество из перемешанного массива
+    for (let i = 0; i < Math.min(quantity, rangeNumbers.length); i++) {
+      const fullNum = prefix + rangeNumbers[i];
+      if (!existingNumbers.has(fullNum)) {
+        newNumbers.add(fullNum);
+      }
+    }
+  } else {
+    // Стандартная генерация (как было раньше)
+    const totalPossible = Math.pow(10, missingDigits);
     const allPossibleSuffixes = [];
+    
     for (let i = 0; i < totalPossible; i++) {
       allPossibleSuffixes.push(String(i).padStart(missingDigits, '0'));
     }
-  
-    // Перемешиваем массив суффиксов
+    
     shuffleArray(allPossibleSuffixes);
-  
+    
     if (quantity >= totalPossible) {
-      // Если запрошено больше или равно чем возможно, берем все перемешанные
       for (const suffix of allPossibleSuffixes) {
         const fullNum = prefix + suffix;
         if (!existingNumbers.has(fullNum)) {
@@ -121,11 +160,9 @@ function generatePhoneNumbers(count) {
         }
       }
     } else {
-      // Берем только необходимое количество из перемешанного массива
       let added = 0;
       for (const suffix of allPossibleSuffixes) {
         if (added >= quantity) break;
-        
         const fullNum = prefix + suffix;
         if (!existingNumbers.has(fullNum)) {
           newNumbers.add(fullNum);
@@ -133,24 +170,24 @@ function generatePhoneNumbers(count) {
         }
       }
     }
-  
-    if (newNumbers.size === 0) {
-      alert("Не удалось сгенерировать новые уникальные номера. Возможно, все комбинации уже использованы.");
-      return;
-    }
-  
-    // Преобразуем Set в массив и дополнительно перемешиваем на случай если взяли подпоследовательность
-    allNumbers = Array.from(newNumbers);
-    shuffleArray(allNumbers);
-    
-    saveToHistory(allNumbers);
-    currentPage = 1;
-    renderList();
-  
-    if (quantity > newNumbers.size) {
-      alert(`Запрошено: ${quantity}\nСгенерировано: ${newNumbers.size}\nНе хватило уникальных комбинаций.`);
-    }
   }
+
+  if (newNumbers.size === 0) {
+    alert("Не удалось сгенерировать новые уникальные номера. Возможно, все комбинации уже использованы.");
+    return;
+  }
+
+  allNumbers = Array.from(newNumbers);
+  shuffleArray(allNumbers);
+  
+  saveToHistory(allNumbers);
+  currentPage = 1;
+  renderList();
+
+  if (quantity > newNumbers.size) {
+    alert(`Запрошено: ${quantity}\nСгенерировано: ${newNumbers.size}\nНе хватило уникальных комбинаций.`);
+  }
+}
   
   // Функция для перемешивания массива (алгоритм Фишера-Йетса)
   function shuffleArray(array) {

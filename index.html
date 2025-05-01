@@ -25,6 +25,12 @@
     <label for="customCount">Кол-во номеров (до 999):</label>
     <input type="number" id="customCount" min="1" max="999" placeholder="20" />
 
+    <label for="rangeStart">Диапазон от:</label>
+    <input type="number" id="rangeStart" min="0" max="9999" placeholder="Начало" />
+
+    <label for="rangeEnd">Диапазон до:</label>
+    <input type="number" id="rangeEnd" min="0" max="9999" placeholder="Конец" />
+
     <button class="generate-butt" onclick="generatePhoneNumbers(document.getElementById('customCount').value)">Сгенерировать</button>
     <br />
     
