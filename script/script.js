@@ -403,11 +403,45 @@ function loadFromTxt() {
   reader.onload = function (e) {
     const text = e.target.result;
     const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
-    const filtered = lines.filter(line => /^7\d{10}$/.test(line));
-    allNumbers = filtered;
-    saveToHistory(filtered);
+    
+    const status = loadStatus(); // Загружаем текущие статусы
+    let newNumbers = []; // Для хранения новых номеров
+    
+    lines.forEach(line => {
+      // Ищем номер телефона (формат 7XXXXXXXXXX)
+      const phoneMatch = line.match(/^(7\d{10})/);
+      if (!phoneMatch) return;
+      
+      const phoneNumber = phoneMatch[1];
+      newNumbers.push(phoneNumber);
+      
+      // Проверяем наличие статуса в строке
+      if (line.includes("(нерабочий)")) {
+        status[phoneNumber] = "bad";
+      } else if (line.includes("(живой)")) {
+        status[phoneNumber] = "alive";
+      } else if (line.includes("(звонили)")) {
+        status[phoneNumber] = "called";
+      } else if (line.includes("(срез)")) {
+        status[phoneNumber] = "cut";
+      }
+      // Если статус не указан, оставляем как есть (или 'uncalled' по умолчанию)
+    });
+
+    if (newNumbers.length === 0) {
+      alert("Не найдено подходящих номеров телефонов в формате 7XXXXXXXXXX");
+      return;
+    }
+
+    // Сохраняем новые номера в историю
+    saveToHistory(newNumbers);
+    // Сохраняем обновленные статусы
+    saveStatus(status);
+    
+    allNumbers = newNumbers;
     currentPage = 1;
     renderList();
+    alert(`Успешно загружено ${newNumbers.length} номеров из TXT файла`);
   };
   reader.readAsText(file);
 }

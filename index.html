@@ -27,11 +27,6 @@
 
     <button class="generate-butt" onclick="generatePhoneNumbers(document.getElementById('customCount').value)">Сгенерировать</button>
     <br />
-
-    <button class="generate-butt" onclick="generatePhoneNumbers(1)">1 номер</button>
-    <button class="generate-butt" onclick="generatePhoneNumbers(5)">5 номеров</button>
-    <button class="generate-butt" onclick="generatePhoneNumbers(10)">10 номеров</button>
-    <br />
     
     <label for="uploadTxt">📥 Загрузить .txt
       <input type="file" id="uploadTxt" name="uploadTxt" accept=".txt" onchange="loadFromTxt()" />
@@ -53,6 +48,7 @@
     <button class="filter-button" onclick="filterNumbers('bad')">Не рабочие</button>
     <button class="filter-button" onclick="filterNumbers('uncalled')">Без звонка</button>
     <button class="filter-button" onclick="filterNumbers('cut')">Срезанные</button>
+    
 
     <h3>Сгенерированные номера:</h3>
     <div id="statusSummary" class="status-summary"></div>
