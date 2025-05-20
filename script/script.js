@@ -631,3 +631,22 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
   
+  function scheduleReload() {
+    const now = new Date();
+    const target = new Date();
+
+    target.setHours(8, 10, 0, 0); // Устанавливаем цель: 9:10:00.000
+
+    // Если текущее время уже позже 9:10, ставим цель на завтра
+    if (now > target) {
+        target.setDate(target.getDate() + 1);
+    }
+
+    const delay = target.getTime() - now.getTime(); // Разница во времени в мс
+
+    setTimeout(() => {
+        location.reload(); // Перезагрузка страницы
+    }, delay);
+}
+
+scheduleReload();
