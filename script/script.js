@@ -2,7 +2,7 @@
 let allNumbers = [];
 const HISTORY_KEY = "phoneNumberHistory";
 let currentPage = 1;
-const itemsPerPage = 10;
+const itemsPerPage = 15;
 let currentFilter = 'all';
 
 
